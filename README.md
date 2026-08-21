@@ -31,8 +31,9 @@ Create the database and load the schema:
 mysql -u root -p -e "CREATE DATABASE clinic_db;"
 mysql -u root -p clinic_db < db/schema.sql
 
-# optional: sample data (2 clinics, 4 doctors, 2 patients, 2 visits)
-# login: admin@cliniccare.com / staff@cliniccare.com, password: Password@123
+# optional: sample data (2 clinics, 4 doctors, 4 doctor staff accounts,
+# 2 patients, 2 visits)
+# password for all seeded accounts: Password@123
 mysql -u root -p clinic_db < db/seed.sql
 ```
 
