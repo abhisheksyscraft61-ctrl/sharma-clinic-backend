@@ -1,4 +1,5 @@
 const patientRepo = require('../repositories/patient.repository');
+const doctorRepo = require('../repositories/doctor.repository');
 const { ApiError, ok } = require('../utils/response');
 
 /** GET /api/patients?search=&clinicId= */
@@ -60,7 +61,12 @@ async function assignDoctor(req, res, next) {
   try {
     const patient = await patientRepo.findById(req.params.id);
     if (!patient) throw new ApiError(404, 'Patient not found');
-    await patientRepo.assignDoctor(req.params.id, req.body.doctorId);
+    const requestedDoctorId = String(req.body.doctorId);
+    const doctor = /^\d+$/.test(requestedDoctorId)
+      ? await doctorRepo.findByNumber(Number(requestedDoctorId))
+      : await doctorRepo.findById(requestedDoctorId);
+    if (!doctor) throw new ApiError(404, 'Doctor not found');
+    await patientRepo.assignDoctor(req.params.id, doctor.id);
     const doctors = await patientRepo.getDoctors(req.params.id);
     ok(res, doctors, 201);
   } catch (err) {

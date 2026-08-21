@@ -26,7 +26,16 @@ router.delete('/:id', patientController.remove);
 // ---- Doctor assignment (max 3, enforced in repository + DB trigger) ----
 router.post(
   '/:id/doctors',
-  [body('doctorId').isUUID().withMessage('Valid doctorId is required')],
+  [
+    body('doctorId')
+      .custom((value) => {
+        const numericId = /^\d+$/.test(String(value));
+        const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(value));
+        if (!numericId && !uuid) throw new Error('Valid doctorId is required');
+        return true;
+      })
+      .withMessage('Valid doctorId is required'),
+  ],
   validate,
   patientController.assignDoctor
 );

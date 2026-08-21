@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS doctors (
     id CHAR(36) PRIMARY KEY,
+    doctor_number INT UNIQUE,
     name VARCHAR(150) NOT NULL,
     specialization VARCHAR(150),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
