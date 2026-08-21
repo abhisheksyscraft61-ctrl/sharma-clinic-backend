@@ -12,7 +12,7 @@ DELETE FROM users;
 -- Password: Password@123
 INSERT INTO users (id, name, email, password_hash, role) VALUES
 ('d1111111-1111-4111-8111-111111111111', 'Shikha Sharma', 'admin@cliniccare.com',
- '$2a$10$3euPcmQFCiblsZeEu5s7p.9wVsYh1F2p.o9tBUwPn6c1AXYcpH6Sq', 'admin');
+ '$2a$10$V8pifK8FwBRO1WIabbYIDOoYRMOMrrevYzGUfESMm0S.9ngkBGGsa', 'admin');
 
 INSERT INTO doctors (id, name, specialization) VALUES
 ('a1111111-1111-4111-8111-111111111111', 'Dr. Amit Sharma', 'Junior Doctor'),
