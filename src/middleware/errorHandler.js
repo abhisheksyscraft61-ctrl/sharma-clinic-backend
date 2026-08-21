@@ -15,9 +15,9 @@ function errorHandler(err, req, res, next) {
   } else if (err.code === '23503') {
     statusCode = 400;
     message = 'Referenced record does not exist (foreign key violation).';
-  } else if (err.message && err.message.includes('at most 3 doctors')) {
+  } else if (err.message && err.message.includes('at most 10 doctors')) {
     statusCode = 400;
-    message = 'A patient can have at most 3 doctors assigned.';
+    message = 'A patient can have at most 10 doctors assigned.';
   }
 
   if (!statusCode) statusCode = 500;

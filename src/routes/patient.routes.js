@@ -23,7 +23,7 @@ router.post('/', patientValidation, validate, patientController.create);
 router.put('/:id', patientController.update);
 router.delete('/:id', patientController.remove);
 
-// ---- Doctor assignment (max 3, enforced in repository + DB trigger) ----
+// ---- Doctor assignment (max 10, enforced in repository + DB trigger) ----
 router.post(
   '/:id/doctors',
   [

@@ -1,7 +1,7 @@
 const { query, getClient } = require('../config/db');
 const { randomUUID } = require('crypto');
 
-const MAX_DOCTORS_PER_PATIENT = 3;
+const MAX_DOCTORS_PER_PATIENT = 10;
 
 /**
  * List patients with optional search (name/phone) and optional clinic
@@ -93,7 +93,7 @@ async function getDoctors(patientId) {
   return rows;
 }
 
-/** Assigns a doctor to a patient. Throws if already at the 3-doctor cap
+/** Assigns a doctor to a patient. Throws if already at the 10-doctor cap
  *  (also enforced by a DB trigger as a safety net). */
 async function assignDoctor(patientId, doctorId) {
   const client = await getClient();
@@ -104,7 +104,7 @@ async function assignDoctor(patientId, doctorId) {
       [patientId]
     );
     if (countRows[0].count >= MAX_DOCTORS_PER_PATIENT) {
-      const err = new Error('A patient can have at most 3 doctors assigned');
+      const err = new Error('A patient can have at most 10 doctors assigned');
       err.statusCode = 400;
       throw err;
     }

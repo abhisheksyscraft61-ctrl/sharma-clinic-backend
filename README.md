@@ -5,7 +5,7 @@ Node.js + Express + MySQL backend for the ClinicCare Flutter app
 prescription photo/PDF uploads).
 
 **Fully tested end-to-end** — register/login, clinic & doctor CRUD,
-patient search, doctor assignment (max 3, enforced at both the API and
+patient search, doctor assignment (max 10, enforced at both the API and
 database level), visit creation with real multipart file upload, and
 streaming the uploaded file back out all work as verified during
 development.
@@ -117,7 +117,7 @@ Base URL: `http://localhost:5000/api`
 | POST | `/patients` | `{ name, age, sex, phone, address, registrationNo }` |
 | PUT | `/patients/:id` | any subset of the same fields |
 | DELETE | `/patients/:id` | cascades to visits + files |
-| POST | `/patients/:id/doctors` | `{ doctorId }` — max 3 per patient (400 if exceeded) |
+| POST | `/patients/:id/doctors` | `{ doctorId }` — max 10 per patient (400 if exceeded) |
 | DELETE | `/patients/:id/doctors/:doctorId` | — |
 
 ### Visits (nested under patient + standalone)

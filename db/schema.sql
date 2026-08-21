@@ -88,8 +88,8 @@ CREATE TRIGGER trg_max_doctors
 BEFORE INSERT ON patient_doctors
 FOR EACH ROW
 BEGIN
-    IF (SELECT COUNT(*) FROM patient_doctors WHERE patient_id = NEW.patient_id) >= 3 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A patient can have at most 3 doctors assigned';
+    IF (SELECT COUNT(*) FROM patient_doctors WHERE patient_id = NEW.patient_id) >= 10 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A patient can have at most 10 doctors assigned';
     END IF;
 END//
 DELIMITER ;
