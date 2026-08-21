@@ -1,14 +1,14 @@
 {
   "name": "cliniccare-backend",
   "version": "1.0.0",
-  "description": "Node.js + Express + PostgreSQL backend for the ClinicCare patient management app",
+  "description": "Node.js + Express + MySQL backend for the ClinicCare patient management app",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "db:migrate": "node -e \"require('./src/config/db').runSqlFile('./db/schema.sql')\"",
-    "db:seed": "node -e \"require('./src/config/db').runSqlFile('./db/seed.sql')\""
+    "db:migrate": "mysql -u$DB_USER -p$DB_PASSWORD -h$DB_HOST $DB_NAME < db/schema.sql",
+    "db:seed": "mysql -u$DB_USER -p$DB_PASSWORD -h$DB_HOST $DB_NAME < db/seed.sql"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -20,7 +20,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.0.0",
-    "pg": "^8.12.0",
+    "mysql2": "^3.11.3",
     "serve-favicon": "^2.5.1",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1"

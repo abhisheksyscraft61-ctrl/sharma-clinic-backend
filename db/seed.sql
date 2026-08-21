@@ -1,14 +1,15 @@
 -- ============================================================
 -- Seed data - run AFTER schema.sql for local dev/testing
---   psql -U postgres -d clinic_db -f db/seed.sql
+--   mysql -u root -p clinic_db < db/seed.sql
 -- ============================================================
 
 -- Password for both seeded users is: Password@123
 -- (hash generated with bcryptjs, 10 salt rounds)
-INSERT INTO users (name, email, password_hash, role) VALUES
-('Dr. Owner Admin', 'admin@cliniccare.com',
+INSERT INTO users (id, name, email, password_hash, role) VALUES
+('d1111111-1111-1111-1111-111111111111',
+'Dr. Owner Admin', 'admin@cliniccare.com',
  '$2a$10$3euPcmQFCiblsZeEu5s7p.9wVsYh1F2p.o9tBUwPn6c1AXYcpH6Sq', 'admin'),
-('Front Desk Staff', 'staff@cliniccare.com',
+('d2222222-2222-2222-2222-222222222222', 'Front Desk Staff', 'staff@cliniccare.com',
  '$2a$10$3euPcmQFCiblsZeEu5s7p.9wVsYh1F2p.o9tBUwPn6c1AXYcpH6Sq', 'staff');
 
 INSERT INTO clinics (id, name, address) VALUES
@@ -23,7 +24,7 @@ INSERT INTO doctors (id, name, specialization) VALUES
 
 INSERT INTO patients (id, name, age, sex, phone, address, registration_no) VALUES
 ('b1111111-1111-1111-1111-111111111111', 'Rahul Patidar', 34, 'male', '9876543210', '12, Shastri Nagar, Indore', 'REG-1001'),
-('b2222222-2222-2222-2222-222222222222', 'Priya Sharma', 27, 'female', '9123456780', '45, Palasia, Indore', 'REG-1002');
+('b2222222-2222-2222-2222-222222222222', 'Priya Patidar', 27, 'female', '9123456780', '45, Palasia, Indore', 'REG-1002');
 
 INSERT INTO patient_doctors (patient_id, doctor_id) VALUES
 ('b1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111'),

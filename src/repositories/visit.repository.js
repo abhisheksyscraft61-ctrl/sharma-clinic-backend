@@ -1,4 +1,5 @@
 const { query, getClient } = require('../config/db');
+const { randomUUID } = require('crypto');
 
 /** All visits for a patient, newest first, each with its doctor/clinic
  *  names and attached files nested in. */
@@ -8,7 +9,7 @@ async function findByPatient(patientId) {
      FROM visits v
      LEFT JOIN clinics c ON c.id = v.clinic_id
      LEFT JOIN doctors d ON d.id = v.doctor_id
-     WHERE v.patient_id = $1
+    WHERE v.patient_id = ?
      ORDER BY v.visit_date DESC, v.created_at DESC`,
     [patientId]
   );
@@ -17,7 +18,7 @@ async function findByPatient(patientId) {
 
   const visitIds = visits.map((v) => v.id);
   const { rows: files } = await query(
-    `SELECT * FROM visit_files WHERE visit_id = ANY($1::uuid[]) ORDER BY uploaded_at`,
+    `SELECT * FROM visit_files WHERE visit_id IN (?) ORDER BY uploaded_at`,
     [visitIds]
   );
 
@@ -33,13 +34,13 @@ async function findById(id) {
      FROM visits v
      LEFT JOIN clinics c ON c.id = v.clinic_id
      LEFT JOIN doctors d ON d.id = v.doctor_id
-     WHERE v.id = $1`,
+    WHERE v.id = ?`,
     [id]
   );
   if (!rows[0]) return null;
 
   const { rows: files } = await query(
-    'SELECT * FROM visit_files WHERE visit_id = $1 ORDER BY uploaded_at',
+    'SELECT * FROM visit_files WHERE visit_id = ? ORDER BY uploaded_at',
     [id]
   );
   return { ...rows[0], files };
@@ -53,22 +54,29 @@ async function create({ patientId, clinicId, doctorId, visitDate, notes, created
   const client = await getClient();
   try {
     await client.query('BEGIN');
+    const visitId = randomUUID();
 
-    const { rows } = await client.query(
-      `INSERT INTO visits (patient_id, clinic_id, doctor_id, visit_date, notes, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [patientId, clinicId, doctorId, visitDate, notes, createdBy]
+    await client.query(
+      `INSERT INTO visits (id, patient_id, clinic_id, doctor_id, visit_date, notes, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [visitId, patientId, clinicId, doctorId, visitDate, notes, createdBy]
     );
-    const visit = rows[0];
+    const { rows: visitRows } = await client.query('SELECT * FROM visits WHERE id = ?', [visitId]);
+    const visit = visitRows[0];
 
     const savedFiles = [];
     for (const f of files || []) {
-      const { rows: fileRows } = await client.query(
-        `INSERT INTO visit_files (visit_id, file_name, file_path, file_type, file_size)
-         VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-        [visit.id, f.fileName, f.filePath, f.fileType, f.fileSize]
+      const fileId = randomUUID();
+      await client.query(
+        `INSERT INTO visit_files (id, visit_id, file_name, file_path, file_type, file_size)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [fileId, visit.id, f.fileName, f.filePath, f.fileType, f.fileSize]
       );
-      savedFiles.push(fileRows[0]);
+      const { rows: savedFileRows } = await client.query(
+        'SELECT * FROM visit_files WHERE id = ?',
+        [fileId]
+      );
+      savedFiles.push(savedFileRows[0]);
     }
 
     await client.query('COMMIT');
@@ -82,17 +90,17 @@ async function create({ patientId, clinicId, doctorId, visitDate, notes, created
 }
 
 async function remove(id) {
-  const { rowCount } = await query('DELETE FROM visits WHERE id = $1', [id]);
+  const { rowCount } = await query('DELETE FROM visits WHERE id = ?', [id]);
   return rowCount > 0;
 }
 
 async function findFileById(fileId) {
-  const { rows } = await query('SELECT * FROM visit_files WHERE id = $1', [fileId]);
+  const { rows } = await query('SELECT * FROM visit_files WHERE id = ?', [fileId]);
   return rows[0];
 }
 
 async function removeFile(fileId) {
-  const { rowCount } = await query('DELETE FROM visit_files WHERE id = $1', [fileId]);
+  const { rowCount } = await query('DELETE FROM visit_files WHERE id = ?', [fileId]);
   return rowCount > 0;
 }
 

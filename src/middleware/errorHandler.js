@@ -8,7 +8,7 @@ function notFound(req, res, next) {
 function errorHandler(err, req, res, next) {
   let { statusCode, message, details } = err;
 
-  // Postgres-specific errors -> friendlier messages
+  // Database errors -> friendlier messages
   if (err.code === '23505') {
     statusCode = 409;
     message = 'A record with this value already exists (duplicate).';

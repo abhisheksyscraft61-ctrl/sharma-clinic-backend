@@ -1,6 +1,6 @@
 # ClinicCare Backend
 
-Node.js + Express + PostgreSQL backend for the ClinicCare Flutter app
+Node.js + Express + MySQL backend for the ClinicCare Flutter app
 (2 clinics, same owner, shared patients, per-visit clinic tagging,
 prescription photo/PDF uploads).
 
@@ -13,7 +13,7 @@ development.
 ## 1. Requirements
 
 - Node.js 18+
-- PostgreSQL 14+
+- MySQL 8+
 
 ## 2. Setup
 
@@ -21,19 +21,19 @@ development.
 cd clinic-backend
 npm install
 
-# copy env file and fill in your local Postgres credentials
+# copy env file and fill in your local MySQL credentials
 cp .env.example .env
 ```
 
 Create the database and load the schema:
 
 ```bash
-createdb clinic_db
-psql -U postgres -d clinic_db -f db/schema.sql
+mysql -u root -p -e "CREATE DATABASE clinic_db;"
+mysql -u root -p clinic_db < db/schema.sql
 
 # optional: sample data (2 clinics, 4 doctors, 2 patients, 2 visits)
 # login: admin@cliniccare.com / staff@cliniccare.com, password: Password@123
-psql -U postgres -d clinic_db -f db/seed.sql
+mysql -u root -p clinic_db < db/seed.sql
 ```
 
 Run the server:
@@ -49,7 +49,7 @@ Server starts at `http://localhost:5000`. Health check: `GET /health`.
 
 ```
 src/
-  config/db.js          -> PostgreSQL connection pool
+  config/db.js          -> MySQL connection pool
   middleware/
     auth.js              -> JWT verification + role guard
     upload.js             -> Multer config (image/pdf only, 10MB limit)
@@ -61,7 +61,7 @@ src/
   app.js                     -> Express app (middleware + route mounting)
   server.js                   -> entry point, connects DB then listens
 db/
-  schema.sql                   -> full Postgres schema + triggers
+  schema.sql                   -> full MySQL schema + triggers
   seed.sql                      -> sample data for local dev
 uploads/                          -> uploaded prescription files (gitignored)
 ```

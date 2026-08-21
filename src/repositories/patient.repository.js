@@ -1,4 +1,5 @@
 const { query, getClient } = require('../config/db');
+const { randomUUID } = require('crypto');
 
 const MAX_DOCTORS_PER_PATIENT = 3;
 
@@ -20,12 +21,14 @@ async function findAll({ search, clinicId } = {}) {
 
   if (clinicId) {
     params.push(clinicId);
-    sql += ` WHERE p.id IN (SELECT patient_id FROM visits WHERE clinic_id = $${params.length})`;
+    sql += ' WHERE p.id IN (SELECT patient_id FROM visits WHERE clinic_id = ?)';
   }
 
   if (search) {
     params.push(`%${search.toLowerCase()}%`);
-    const clause = `(LOWER(p.name) LIKE $${params.length} OR p.phone LIKE $${params.length})`;
+    params.push(`%${search.toLowerCase()}%`);
+    const clause = '(LOWER(p.name) LIKE ? OR p.phone LIKE ?)';
+    params.push(params[params.length - 1]);
     sql += conditions.length || clinicId ? ` AND ${clause}` : ` WHERE ${clause}`;
   }
 
@@ -36,44 +39,45 @@ async function findAll({ search, clinicId } = {}) {
 }
 
 async function findById(id) {
-  const { rows } = await query('SELECT * FROM patients WHERE id = $1', [id]);
+  const { rows } = await query('SELECT * FROM patients WHERE id = ?', [id]);
   return rows[0];
 }
 
 async function findByRegistrationNo(registrationNo) {
   const { rows } = await query(
-    'SELECT * FROM patients WHERE registration_no = $1',
+    'SELECT * FROM patients WHERE registration_no = ?',
     [registrationNo]
   );
   return rows[0];
 }
 
 async function create({ name, age, sex, phone, address, registrationNo }) {
-  const { rows } = await query(
-    `INSERT INTO patients (name, age, sex, phone, address, registration_no)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-    [name, age, sex, phone, address, registrationNo]
+  await query(
+    `INSERT INTO patients (id, name, age, sex, phone, address, registration_no)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [randomUUID(), name, age, sex, phone, address, registrationNo]
   );
+  const { rows } = await query('SELECT * FROM patients WHERE registration_no = ?', [registrationNo]);
   return rows[0];
 }
 
 async function update(id, { name, age, sex, phone, address, registrationNo }) {
   const { rows } = await query(
     `UPDATE patients SET
-       name = COALESCE($2, name),
-       age = COALESCE($3, age),
-       sex = COALESCE($4, sex),
-       phone = COALESCE($5, phone),
-       address = COALESCE($6, address),
-       registration_no = COALESCE($7, registration_no)
-     WHERE id = $1 RETURNING *`,
-    [id, name, age, sex, phone, address, registrationNo]
+       name = COALESCE(?, name),
+       age = COALESCE(?, age),
+       sex = COALESCE(?, sex),
+       phone = COALESCE(?, phone),
+       address = COALESCE(?, address),
+       registration_no = COALESCE(?, registration_no)
+     WHERE id = ?`,
+    [name, age, sex, phone, address, registrationNo, id]
   );
-  return rows[0];
+  return findById(id);
 }
 
 async function remove(id) {
-  const { rowCount } = await query('DELETE FROM patients WHERE id = $1', [id]);
+  const { rowCount } = await query('DELETE FROM patients WHERE id = ?', [id]);
   return rowCount > 0;
 }
 
@@ -82,7 +86,7 @@ async function getDoctors(patientId) {
   const { rows } = await query(
     `SELECT d.* FROM doctors d
      JOIN patient_doctors pd ON pd.doctor_id = d.id
-     WHERE pd.patient_id = $1
+    WHERE pd.patient_id = ?
      ORDER BY pd.assigned_at`,
     [patientId]
   );
@@ -96,7 +100,7 @@ async function assignDoctor(patientId, doctorId) {
   try {
     await client.query('BEGIN');
     const { rows: countRows } = await client.query(
-      'SELECT COUNT(*)::int AS count FROM patient_doctors WHERE patient_id = $1',
+      'SELECT COUNT(*) AS count FROM patient_doctors WHERE patient_id = ?',
       [patientId]
     );
     if (countRows[0].count >= MAX_DOCTORS_PER_PATIENT) {
@@ -105,8 +109,7 @@ async function assignDoctor(patientId, doctorId) {
       throw err;
     }
     await client.query(
-      `INSERT INTO patient_doctors (patient_id, doctor_id) VALUES ($1, $2)
-       ON CONFLICT (patient_id, doctor_id) DO NOTHING`,
+      `INSERT IGNORE INTO patient_doctors (patient_id, doctor_id) VALUES (?, ?)`,
       [patientId, doctorId]
     );
     await client.query('COMMIT');
@@ -120,7 +123,7 @@ async function assignDoctor(patientId, doctorId) {
 
 async function unassignDoctor(patientId, doctorId) {
   const { rowCount } = await query(
-    'DELETE FROM patient_doctors WHERE patient_id = $1 AND doctor_id = $2',
+    'DELETE FROM patient_doctors WHERE patient_id = ? AND doctor_id = ?',
     [patientId, doctorId]
   );
   return rowCount > 0;

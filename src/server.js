@@ -7,7 +7,7 @@ const startServer = async () => {
   try {
     await pool.query("SELECT NOW()");
 
-    console.log("✅ PostgreSQL Connected");
+    console.log("✅ MySQL Connected");
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
