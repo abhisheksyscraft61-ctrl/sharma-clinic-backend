@@ -12,7 +12,7 @@ function errorHandler(err, req, res, next) {
   if (err.code === '23505') {
     statusCode = 409;
     message = 'A record with this value already exists (duplicate).';
-  } else if (err.code === '23503') {
+  } else if (err.code === '23503' || err.code === 'ER_NO_REFERENCED_ROW_2' || err.errno === 1452) {
     statusCode = 400;
     message = 'Referenced record does not exist (foreign key violation).';
   } else if (err.message && err.message.includes('at most 10 doctors')) {

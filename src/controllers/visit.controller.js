@@ -2,6 +2,9 @@ const path = require('path');
 const fs = require('fs');
 const visitRepo = require('../repositories/visit.repository');
 const patientRepo = require('../repositories/patient.repository');
+const clinicRepo = require('../repositories/clinic.repository');
+const doctorRepo = require('../repositories/doctor.repository');
+const userRepo = require('../repositories/user.repository');
 const { fileTypeFromMime } = require('../middleware/upload');
 const { ApiError, ok } = require('../utils/response');
 
@@ -39,6 +42,19 @@ async function create(req, res, next) {
     if (!patient) throw new ApiError(404, 'Patient not found');
 
     const { clinicId, doctorId, visitDate, notes } = req.body;
+
+    const clinic = await clinicRepo.findById(clinicId);
+    if (!clinic) throw new ApiError(404, 'Clinic not found');
+
+    if (doctorId) {
+      const doctor = await doctorRepo.findById(doctorId);
+      if (!doctor) throw new ApiError(404, 'Doctor not found');
+    }
+
+    if (req.user?.id) {
+      const user = await userRepo.findById(req.user.id);
+      if (!user) throw new ApiError(401, 'Login user no longer exists');
+    }
 
     const files = (req.files || []).map((f) => ({
       fileName: f.originalname,
