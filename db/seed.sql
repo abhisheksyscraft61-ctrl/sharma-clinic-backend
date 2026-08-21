@@ -22,6 +22,10 @@ INSERT INTO users (id, name, email, password_hash, role) VALUES
 ('d5555555-5555-4555-8555-555555555555', 'Dr. S. Verma', 'sverma@cliniccare.com',
  '$2a$10$V8pifK8FwBRO1WIabbYIDOoYRMOMrrevYzGUfESMm0S.9ngkBGGsa', 'staff');
 
+INSERT INTO clinics (id, name, address) VALUES
+('c1111111-1111-4111-8111-111111111111', 'Vijay Nagar', 'Vijay Nagar'),
+('c2222222-2222-4222-8222-222222222222', 'Geeta Bhawan', 'Geeta Bhawan');
+
 INSERT INTO doctors (id, doctor_number, name, specialization) VALUES
 ('a2222222-2222-2222-2222-222222222222', 1, 'Dr. A. Mehta', 'Orthopedic'),
 ('a4444444-4444-4444-4444-444444444444', 2, 'Dr. P. Nair', 'ENT Specialist'),
