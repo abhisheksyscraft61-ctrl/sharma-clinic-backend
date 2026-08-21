@@ -38,7 +38,7 @@ router.post(
   '/:patientId/visits',
   upload.array('files', 5),
   [
-    body('clinicId').isUUID().withMessage('Valid clinicId is required'),
+    body('clinicId').isUUID('all').withMessage('Valid clinicId is required'),
     body('visitDate').isISO8601().withMessage('Valid visitDate (YYYY-MM-DD) is required'),
   ],
   validate,
